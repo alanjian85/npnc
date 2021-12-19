@@ -26,6 +26,12 @@ int main() {
         std::cout << "Create directory bar: FAILED\n";
     }
 
+    if (auto p = dynamic_cast<file*>(&d["bar"])) {
+        std::cout << "bar is a file\n";
+    } else if (auto p = dynamic_cast<directory*>(&d["bar"])) {
+        std::cout << "bar is a directory\n";        
+    }
+
     std::cout << "bar exist: " << d.exist("bar") << '\n';
 
     return 0;

@@ -3,6 +3,7 @@
 
 #include <algorithm>
 #include <functional>
+#include <stdexcept>
 #include <vector>
 #include <numeric>
 
@@ -92,8 +93,48 @@ namespace npnc {
 
         bool remove(const std::string& name) {
             return remove_file(name) || remove_directory(name);
-        } 
-    private:
+        }
+
+        const file& get_file(const std::string& name) const {
+            for (auto& f : files_) {
+                if (f == name) {
+                    return f;
+                }
+            }
+            throw std::out_of_range("Directory does not contain file " + name);
+        }
+
+        file& get_file(const std::string& name) {
+            return const_cast<file&>(get_file(name));
+        }
+
+        const directory& get_directory(const std::string& name) const {
+            for (auto& dir : directories_) {
+                if (dir == name) {
+                    return dir;
+                }
+            }
+            throw std::out_of_range("Directory does not contain sub-directory " + name);
+        }
+
+        directory& get_directory(const std::string& name) {
+            return const_cast<directory&>(get_directory(name));
+        }
+
+        const entry& at(const std::string& name) const;
+
+        entry& at(const std::string& name) {
+            return const_cast<entry&>(at(name));
+        }
+
+        const entry& operator[](const std::string& name) const {
+            return at(name);
+        }
+ 
+        entry& operator[](const std::string& name) {
+            return at(name);
+        }
+   private:
         std::string name_;
         std::vector<file> files_;
         std::vector<directory> directories_;
