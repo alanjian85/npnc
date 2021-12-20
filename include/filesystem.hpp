@@ -22,11 +22,13 @@ namespace npnc {
         }
 
         const entry& at(path p) const {
-            p = process_path(p);
+            p = default_path_ + p;
             auto dir = &root_;
             for (auto i = p.cbegin(); i != p.cend(); ++i) {
-                if (*i == "/")
+                if (*i == "/") {
+                    dir = &root_;
                     continue;
+                }
 
                 if (i + 1 == p.cend()) {
                     return dir->at(*i);
@@ -49,14 +51,6 @@ namespace npnc {
             return at(p);
         }
     private:
-        path process_path(const path& p) const noexcept {
-            if (!p.empty() && *p.begin() == "/") {
-                return p;
-            } else {
-                return default_path_ + p;
-            }
-        }
-
         directory root_;
         path default_path_;
     };
