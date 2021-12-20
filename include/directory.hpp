@@ -123,20 +123,20 @@ namespace npnc {
             return file_exist(name) || directory_exist(name); 
         }
 
-        bool create_file(std::string name) noexcept {
+        file* create_file(std::string name) noexcept {
             if (!file_exist(name) && !directory_exist(name)) {
                 files_.push_back(std::move(name));
-                return true;
+                return &files_.back();
             }
-            return false;
+            return nullptr;
         }
 
-        bool create_directory(std::string name) noexcept {
+        directory* create_directory(std::string name) noexcept {
             if (!directory_exist(name) && !file_exist(name)) {
                 directories_.push_back(std::move(name));
-                return true;
+                return &directories_.back();
             }
-            return false;
+            return nullptr;
         }
 
         bool remove_file(const std::string& name) noexcept {

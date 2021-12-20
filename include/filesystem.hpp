@@ -29,11 +29,9 @@ namespace npnc {
                     continue;
 
                 if (i + 1 == p.cend()) {
-                    return (*dir)[*i];
+                    return dir->at(*i);
                 } else {
-                    dir = dynamic_cast<const directory*>(&(*dir)[*i]);
-                    if (!dir)
-                        throw std::invalid_argument(*i + " is not a folder!");
+                    dir = &dir->get_directory(*i);
                 }
             }
             throw std::invalid_argument("Path is empty!");
