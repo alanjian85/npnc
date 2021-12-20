@@ -124,7 +124,7 @@ namespace npnc {
         const entry& at(const std::string& name) const;
 
         entry& at(const std::string& name) {
-            return const_cast<entry&>(at(name));
+            return const_cast<entry&>(static_cast<const directory*>(this)->at(name));
         }
 
         const entry& operator[](const std::string& name) const {

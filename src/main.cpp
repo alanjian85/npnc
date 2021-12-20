@@ -18,8 +18,8 @@ int main() {
     
     std::cout << "foo exist: " << d.exist("foo") << '\n';
 
-    d.create_file("bar");
-    std::cout << "Create file bar\n";
+    //d.create_file("bar");
+    //std::cout << "Create file bar\n";
     if (d.create_directory("bar")) {
         std::cout << "Create directory bar: SUCCESS\n";
     } else {
