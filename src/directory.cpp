@@ -16,5 +16,5 @@ const entry& directory::at(const std::string& name) const {
         }
     }
 
-    throw std::out_of_range("Directory doesn't contain entry " + name);
+    throw std::out_of_range("Directory " + this->name() + " doesn't contain entry " + name);
 }

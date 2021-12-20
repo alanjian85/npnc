@@ -171,7 +171,7 @@ namespace npnc {
                     return f;
                 }
             }
-            throw std::out_of_range("Directory does not contain file " + name);
+            throw std::out_of_range("Directory " + this->name() + " does not contain file " + name);
         }
 
         file& get_file(const std::string& name) {
@@ -184,7 +184,7 @@ namespace npnc {
                     return dir;
                 }
             }
-            throw std::out_of_range("Directory does not contain sub-directory " + name);
+            throw std::out_of_range("Directory " + this->name() + " does not contain sub-directory " + name);
         }
 
         directory& get_directory(const std::string& name) {
@@ -233,7 +233,6 @@ namespace npnc {
             return end();
         }
     private:
-        std::string name_;
         std::vector<file> files_;
         std::vector<directory> directories_;
     };

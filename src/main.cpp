@@ -1,14 +1,12 @@
 #include <iostream>
 
-#include "path.hpp"
+#include "filesystem.hpp"
 
 using namespace npnc;
 
 int main() {
-    path p = "/hello/world/test.txt";
-    for (auto& e : p) {
-        std::cout << e << " | ";
-    }
-    std::cout << '\n';
+    filesystem fs;
+    fs.set_default_path("/home/");
+    fs["test"];
     return 0;
 }
