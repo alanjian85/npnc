@@ -1,8 +1,6 @@
 #include "directory.hpp"
 using namespace npnc;
 
-#include <stdexcept>
-
 const entry& directory::at(const std::string& name) const {
     for (auto& f : files_) {
         if (f == name) {

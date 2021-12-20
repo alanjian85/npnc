@@ -36,8 +36,10 @@ path::path(const char* text) {
             }
             break;
         case parse_status::delim:
-            status = parse_status::element;
-            elements_.emplace_back(1, text[i]);
+            if (text[i] != '/') {
+                status = parse_status::element;
+                elements_.emplace_back(1, text[i]);
+            }
             break;
         default:
             throw std::invalid_argument("Invalid path");

@@ -1,6 +1,7 @@
 #ifndef NPNC_ENTRY_HPP
 #define NPNC_ENTRY_HPP
 
+#include <stdexcept>
 #include <string>
 
 namespace npnc {
@@ -10,7 +11,8 @@ namespace npnc {
         entry(std::string name)
             : name_(std::move(name))
         {
-        
+            if (name_.empty())
+                throw std::invalid_argument("Entry name cannot be empty!");
         }
 
         const std::string& name() const noexcept {
