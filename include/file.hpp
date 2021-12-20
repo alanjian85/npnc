@@ -12,7 +12,7 @@ namespace npnc {
             return true;
         }
 
-        std::string::size_type size() const noexcept {
+        std::string::size_type space() const noexcept {
             return content_.size();
         }
     private:

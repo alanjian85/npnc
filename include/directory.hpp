@@ -2,6 +2,7 @@
 #define NPNC_DIRECTORY_HPP
 
 #include <algorithm>
+#include <cstdlib>
 #include <functional>
 #include <stdexcept>
 #include <vector>
@@ -13,22 +14,91 @@
 namespace npnc {
     class directory : public entry {
     public:
+        using size_type = std::size_t;
+        
+        class iterator {
+            friend class directory;
+        
+            iterator(directory& dir, std::size_t index)
+                : directory_(dir),
+                  index_(index)
+            {
+                
+            }
+        public:
+            entry& operator*() const noexcept {
+                if (index_ < directory_.files_.size()) {
+                    return directory_.files_[index_];
+                } else {
+                    return directory_.directories_[index_ - directory_.files_.size()];
+                }
+            }
+
+            iterator& operator++() noexcept {
+                ++index_;
+                return *this;
+            }
+
+            friend inline bool operator!=(iterator lhs, iterator rhs) noexcept {
+                return &lhs.directory_ != &rhs.directory_ || lhs.index_ != rhs.index_;
+            }
+        private:
+            directory& directory_;
+            std::size_t index_;
+        };
+
+        class const_iterator {
+            friend class directory;
+
+            const_iterator(const directory& dir, std::size_t index)
+                : directory_(dir),
+                  index_(index)
+            {
+            
+            }
+        public:
+            const entry& operator*() const noexcept {
+                if (index_ < directory_.files_.size()) {
+                    return directory_.files_[index_];
+                } else {
+                    return directory_.directories_[index_ - directory_.files_.size()];
+                }
+            }
+
+            const_iterator& operator++() noexcept {
+                ++index_;
+                return *this;
+            }
+
+            const_iterator operator++(int) noexcept {
+                auto it = *this;
+                ++index_;
+                return it;
+            }
+
+            friend inline bool operator!=(const_iterator lhs, const_iterator rhs) noexcept {
+                return &lhs.directory_ != &rhs.directory_ || lhs.index_ != rhs.index_;
+            }
+       private:
+            const directory& directory_;
+            std::size_t index_;
+        };
+
         using entry::entry;
 
         bool is_directory() const noexcept override {
             return true;
         }
 
-        std::string::size_type size() const noexcept {
-            auto fs = static_cast<std::string::size_type>(0);
+        std::string::size_type space() const noexcept {
+            auto res = static_cast<std::string::size_type>(0);
             for (auto& f : files_) {
-                fs += f.size();
+                res += f.space();
             }
-            auto ds = static_cast<std::string::size_type>(0);
             for (auto& dir : directories_) {
-                ds += dir.size();
+                res += dir.space();
             }
-            return fs + ds;
+            return res;
         }
 
         bool file_exist(const std::string& name) const noexcept {
@@ -105,7 +175,7 @@ namespace npnc {
         }
 
         file& get_file(const std::string& name) {
-            return const_cast<file&>(get_file(name));
+            return const_cast<file&>(static_cast<const directory*>(this)->get_file(name));
         }
 
         const directory& get_directory(const std::string& name) const {
@@ -118,7 +188,7 @@ namespace npnc {
         }
 
         directory& get_directory(const std::string& name) {
-            return const_cast<directory&>(get_directory(name));
+            return const_cast<directory&>(static_cast<const directory*>(this)->get_directory(name));
         }
 
         const entry& at(const std::string& name) const;
@@ -134,7 +204,35 @@ namespace npnc {
         entry& operator[](const std::string& name) {
             return at(name);
         }
-   private:
+
+        size_type size() const noexcept {
+            return files_.size() + directories_.size();
+        }
+
+        iterator begin() noexcept {
+            return {*this, 0};
+        }
+
+        const_iterator begin() const noexcept {
+            return {*this, 0};
+        }
+
+        iterator end() noexcept {
+            return {*this, files_.size() + directories_.size()};
+        }
+
+        const_iterator end() const noexcept {
+            return {*this, files_.size() + directories_.size()};
+        }
+
+        const_iterator cbegin() const noexcept {
+            return begin();
+        }
+
+        const_iterator cend() const noexcept {
+            return end();
+        }
+    private:
         std::string name_;
         std::vector<file> files_;
         std::vector<directory> directories_;

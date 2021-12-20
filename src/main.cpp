@@ -18,8 +18,11 @@ int main() {
     
     std::cout << "foo exist: " << d.exist("foo") << '\n';
 
-    //d.create_file("bar");
-    //std::cout << "Create file bar\n";
+    d.create_directory("Desktop");
+    std::cout << "Create directory Desktop\n";
+
+    d.create_file("bar");
+    std::cout << "Create file bar\n";
     if (d.create_directory("bar")) {
         std::cout << "Create directory bar: SUCCESS\n";
     } else {
@@ -33,6 +36,14 @@ int main() {
     }
 
     std::cout << "bar exist: " << d.exist("bar") << '\n';
+
+    std::cout << "List:\n";
+    for (auto& e : d) {
+        if (e.is_file())
+            std::cout << '\t' << e.name() << " - file\n";
+        else
+            std::cout << '\t' << e.name() << " - directory\n";
+    }
 
     return 0;
 }
