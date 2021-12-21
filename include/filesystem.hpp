@@ -1,18 +1,14 @@
 #ifndef NPNC_FILESYSTEM_HPP
 #define NPNC_FILESYSTEM_HPP
 
+#include <stdexcept>
+
 #include "directory.hpp"
 #include "path.hpp"
 
 namespace npnc {
     class filesystem {
     public:
-        filesystem()
-            : root_("root")
-        {
-        
-        }
-
         const path& default_path() const noexcept {
             return default_path_;
         }
@@ -24,19 +20,17 @@ namespace npnc {
         const entry& at(path p) const {
             p = default_path_ + p;
             auto dir = &root_;
-            for (auto i = p.cbegin(); i != p.cend(); ++i) {
+            for (auto i = p.cbegin(); i != p.cend() - 1; ++i) {
                 if (*i == "/") {
                     dir = &root_;
                     continue;
                 }
 
-                if (i + 1 == p.cend()) {
-                    return dir->at(*i);
-                } else {
-                    dir = &dir->get_directory(*i);
-                }
+                dir = dynamic_cast<const directory*>(&dir->at(*i));
+                if (!dir)
+                    throw std::out_of_range(*i + " is not a directory!");
             }
-            throw std::invalid_argument("Path is empty!");
+            return dir->at(*(p.cend() - 1));
         }
 
         entry& at(const path& p) {

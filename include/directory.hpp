@@ -15,8 +15,58 @@ namespace npnc {
         using entries_type = std::map<std::string, std::unique_ptr<entry>>;
     public:
         using size_type = entries_type::size_type;
-        using iterator = entries_type::iterator;
-        using const_iterator = entries_type::const_iterator;
+        
+        class iterator {
+            friend class directory;
+            
+            iterator(entries_type::iterator it)
+                : iterator_(it)
+            {
+                
+            }
+        public:
+            iterator& operator++() noexcept {
+                ++iterator_;
+                return *this;
+            }
+
+            std::pair<const std::string, entry&> operator*() const noexcept {
+                auto& res = *iterator_;
+                return {res.first, *res.second};
+            }
+
+            friend bool operator!=(iterator lhs, iterator rhs) noexcept {
+                return lhs.iterator_ != rhs.iterator_;
+            }
+        private:
+            entries_type::iterator iterator_;
+        };
+        
+        class const_iterator {
+            friend class directory;
+
+            const_iterator(entries_type::const_iterator it)
+                : iterator_(it)
+            {
+            
+            }
+        public:
+            const_iterator& operator++() noexcept {
+                ++iterator_;
+                return *this;
+            }
+
+            std::pair<const std::string, const entry&> operator*() const noexcept {
+                auto& res = *iterator_;
+                return {res.first, *res.second};
+            }
+
+            friend bool operator!=(const_iterator lhs, const_iterator rhs) noexcept {
+                return lhs.iterator_ != rhs.iterator_;
+            }
+        private:
+            entries_type::const_iterator iterator_;
+        };
 
         bool is_directory() const noexcept override {
             return true;
@@ -88,6 +138,14 @@ namespace npnc {
         }
 
         const_iterator end() const noexcept {
+            return entries_.end();
+        }
+
+        const_iterator cbegin() const noexcept {
+            return entries_.begin();
+        }
+
+        const_iterator cend() const noexcept {
             return entries_.end();
         }
     private:
