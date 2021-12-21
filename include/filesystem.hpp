@@ -9,28 +9,30 @@
 namespace npnc {
     class filesystem {
     public:
-        const path& default_path() const noexcept {
-            return default_path_;
+        const path& current_path() const noexcept {
+            return current_path_;
         }
 
-        void set_default_path(path p) noexcept {
-            default_path_ = std::move(p);
+        void set_current_path(path p) noexcept {
+            current_path_ = std::move(p);
         }
 
         const entry& at(path p) const {
-            p = default_path_ + p;
-            auto dir = &root_;
-            for (auto i = p.cbegin(); i != p.cend() - 1; ++i) {
-                if (*i == "/") {
-                    dir = &root_;
+            p = current_path_ + p;
+            auto res = static_cast<const entry*>(&root_);
+            for (auto& e : p) {
+                if (e == "/") {
+                    res = &root_;
                     continue;
                 }
 
-                dir = dynamic_cast<const directory*>(&dir->at(*i));
-                if (!dir)
-                    throw std::out_of_range(*i + " is not a directory!");
+                if (res->is_directory()) {
+                    res = &static_cast<const directory*>(res)->at(e);
+                } else {
+                    throw std::out_of_range(e + " is not in a directory");
+                }
             }
-            return dir->at(*(p.cend() - 1));
+            return *res;
         }
 
         entry& at(const path& p) {
@@ -44,9 +46,10 @@ namespace npnc {
         entry& operator[](const path& p) {
             return at(p);
         }
-    private:
+
+    public:
         directory root_;
-        path default_path_;
+        path current_path_;
     };
 }
 

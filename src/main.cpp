@@ -1,21 +1,17 @@
 #include <iostream>
 
-#include "directory.hpp"
-
+#include "filesystem.hpp"
 using namespace npnc;
 
 int main() {
-    directory dir;
-    dir.create_file("README.txt");
-    dir.create_directory("foo");
-    dir.create_directory("bar");
-    for (auto [name, e] : dir) {
-        std::cout << name << " - ";
-        if (e.is_file()) {
-            std::cout << "file\n";
-        } else {
-            std::cout << "directory\n";
-        }
+    filesystem fs;
+    fs.root_.create_directory("home");
+    static_cast<directory&>(fs.root_["home"]).create_directory("hello.txt");
+    auto& e = fs["home/hello.txt"];
+    if (e.is_file()) {
+        std::cout << "hello.txt is a file!\n";
+    } else {
+        std::cout << "hello.txt is a directory!\n";
     }
     return 0;
 }
