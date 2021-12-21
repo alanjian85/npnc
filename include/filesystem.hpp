@@ -47,7 +47,46 @@ namespace npnc {
             return at(p);
         }
 
-    public:
+        bool create_file(path p) {
+            p = current_path_ + p;
+            auto dir = &root_;
+            for (auto i = p.cbegin(); i != p.cend() - 1; ++i) {
+                if (*i == "/") {
+                    dir = &root_;
+                    continue;
+                }
+
+                dir = dynamic_cast<directory*>(&dir->at(*i));
+                if (!dir) {
+                    return false;
+                }
+            }
+            dir->create_file(*(p.cend() - 1));
+            return true;
+        }
+
+        bool create_directory(path p) {
+            p = current_path_ + p;
+            auto dir = &root_;
+            for (auto i = p.cbegin(); i != p.cend() - 1; ++i) {
+                if (*i == "/") {
+                    dir = &root_;
+                    continue;
+                }
+
+                dir = dynamic_cast<directory*>(&dir->at(*i));
+                if (!dir) {
+                    return false;
+                }
+            }
+            dir->create_directory(*(p.cend() - 1));
+            return true;
+        }
+
+        const directory& root() const noexcept {
+            return root_;
+        }
+    private:
         directory root_;
         path current_path_;
     };

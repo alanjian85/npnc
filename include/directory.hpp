@@ -30,7 +30,7 @@ namespace npnc {
                 return *this;
             }
 
-            std::pair<const std::string, entry&> operator*() const noexcept {
+            std::pair<const std::string&, entry&> operator*() const noexcept {
                 auto& res = *iterator_;
                 return {res.first, *res.second};
             }
@@ -56,7 +56,7 @@ namespace npnc {
                 return *this;
             }
 
-            std::pair<const std::string, const entry&> operator*() const noexcept {
+            std::pair<const std::string&, const entry&> operator*() const noexcept {
                 auto& res = *iterator_;
                 return {res.first, *res.second};
             }

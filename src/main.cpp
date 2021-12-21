@@ -5,13 +5,13 @@ using namespace npnc;
 
 int main() {
     filesystem fs;
-    fs.root_.create_directory("home");
-    static_cast<directory&>(fs.root_["home"]).create_directory("hello.txt");
-    auto& e = fs["home/hello.txt"];
-    if (e.is_file()) {
-        std::cout << "hello.txt is a file!\n";
-    } else {
-        std::cout << "hello.txt is a directory!\n";
+    fs.create_directory("Document");
+    fs.create_file("Document/test.txt");
+    fs.create_directory("Desktop");
+    fs.create_file("Desktop/icon.png");
+    fs.create_file("readme.txt");
+    for (auto [name, e] : fs.root()) {
+        std::cout << name << '\n';
     }
     return 0;
 }
