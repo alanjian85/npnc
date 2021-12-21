@@ -1,28 +1,13 @@
 #ifndef NPNC_ENTRY_HPP
 #define NPNC_ENTRY_HPP
 
-#include <stdexcept>
-#include <string>
+#include <cstdlib>
 
 namespace npnc {
     class entry {
-    public:
-        entry() = default;
-        entry(std::string name)
-            : name_(std::move(name))
-        {
-            if (name_.empty())
-                throw std::invalid_argument("Entry name cannot be empty!");
-        }
+    public: 
+        virtual ~entry() {}        
 
-        const std::string& name() const noexcept {
-            return name_;
-        }
-
-        void rename(std::string name) noexcept {
-            name = std::move(name);
-        }
-    
         virtual bool is_directory() const noexcept {
             return false;
         }
@@ -30,13 +15,9 @@ namespace npnc {
         virtual bool is_file() const noexcept { 
             return false;
         }
-    private:
-        std::string name_;
-    };
 
-    inline bool operator==(const entry& lhs, const std::string& rhs) noexcept {
-        return lhs.name() == rhs;
-    }
+        virtual std::size_t space() const noexcept = 0;
+    };
 }
 
 #endif

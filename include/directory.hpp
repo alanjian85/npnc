@@ -1,197 +1,63 @@
 #ifndef NPNC_DIRECTORY_HPP
 #define NPNC_DIRECTORY_HPP
 
-#include <algorithm>
 #include <cstdlib>
-#include <functional>
 #include <stdexcept>
-#include <vector>
-#include <numeric>
+#include <map>
+#include <memory>
+#include <utility>
 
 #include "entry.hpp"
 #include "file.hpp"
 
 namespace npnc {
     class directory : public entry {
+        using entries_type = std::map<std::string, std::unique_ptr<entry>>;
     public:
-        using size_type = std::size_t;
-        
-        class iterator {
-            friend class directory;
-        
-            iterator(directory& dir, std::size_t index)
-                : directory_(dir),
-                  index_(index)
-            {
-                
-            }
-        public:
-            entry& operator*() const noexcept {
-                if (index_ < directory_.files_.size()) {
-                    return directory_.files_[index_];
-                } else {
-                    return directory_.directories_[index_ - directory_.files_.size()];
-                }
-            }
-
-            iterator& operator++() noexcept {
-                ++index_;
-                return *this;
-            }
-
-            friend inline bool operator!=(iterator lhs, iterator rhs) noexcept {
-                return &lhs.directory_ != &rhs.directory_ || lhs.index_ != rhs.index_;
-            }
-        private:
-            directory& directory_;
-            std::size_t index_;
-        };
-
-        class const_iterator {
-            friend class directory;
-
-            const_iterator(const directory& dir, std::size_t index)
-                : directory_(dir),
-                  index_(index)
-            {
-            
-            }
-        public:
-            const entry& operator*() const noexcept {
-                if (index_ < directory_.files_.size()) {
-                    return directory_.files_[index_];
-                } else {
-                    return directory_.directories_[index_ - directory_.files_.size()];
-                }
-            }
-
-            const_iterator& operator++() noexcept {
-                ++index_;
-                return *this;
-            }
-
-            const_iterator operator++(int) noexcept {
-                auto it = *this;
-                ++index_;
-                return it;
-            }
-
-            friend inline bool operator!=(const_iterator lhs, const_iterator rhs) noexcept {
-                return &lhs.directory_ != &rhs.directory_ || lhs.index_ != rhs.index_;
-            }
-       private:
-            const directory& directory_;
-            std::size_t index_;
-        };
-
-        using entry::entry;
+        using size_type = entries_type::size_type;
+        using iterator = entries_type::iterator;
+        using const_iterator = entries_type::const_iterator;
 
         bool is_directory() const noexcept override {
             return true;
         }
 
-        std::string::size_type space() const noexcept {
-            auto res = static_cast<std::string::size_type>(0);
-            for (auto& f : files_) {
-                res += f.space();
-            }
-            for (auto& dir : directories_) {
-                res += dir.space();
+        std::string::size_type space() const noexcept override {
+            auto res = static_cast<std::size_t>(0);
+            for (auto& e : entries_) {
+                res += e.second->space();
             }
             return res;
         }
 
-        bool file_exist(const std::string& name) const noexcept {
-            for (auto& f : files_) {
-                if (f == name) {
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        bool directory_exist(const std::string& name) const noexcept {
-            for (auto& dir : directories_) {
-                if (dir == name) {
-                    return true;
-                }
-            }
-            return false;
-        }
-
         bool exist(const std::string& name) const noexcept {
-            return file_exist(name) || directory_exist(name); 
+            return entries_.find(name) != entries_.cend(); 
         }
 
-        file* create_file(std::string name) noexcept {
-            if (!file_exist(name) && !directory_exist(name)) {
-                files_.push_back(std::move(name));
-                return &files_.back();
-            }
-            return nullptr;
+        bool create_file(std::string name) noexcept {
+            return entries_.insert({std::move(name), std::make_unique<file>()}).second;
         }
 
-        directory* create_directory(std::string name) noexcept {
-            if (!directory_exist(name) && !file_exist(name)) {
-                directories_.push_back(std::move(name));
-                return &directories_.back();
-            }
-            return nullptr;
-        }
-
-        bool remove_file(const std::string& name) noexcept {
-            auto it = std::find_if(files_.cbegin(), files_.cend(),
-                [&name](const file& f) noexcept {
-                    return f == name;
-                });
-            if (it != files_.cend()) {
-                files_.erase(it);
-            }
-            return false;
-        }
-
-        bool remove_directory(const std::string& name) noexcept {
-            auto it = std::find_if(directories_.cbegin(), directories_.cend(),
-                [&name](const directory& dir) noexcept {
-                    return dir == name;
-                });
-            if (it != directories_.cend()) {
-                directories_.erase(it);
-            }
-            return false;
+        bool create_directory(std::string name) noexcept {
+            return entries_.insert({std::move(name), std::make_unique<directory>()}).second;
         }
 
         bool remove(const std::string& name) {
-            return remove_file(name) || remove_directory(name);
-        }
-
-        const file& get_file(const std::string& name) const {
-            for (auto& f : files_) {
-                if (f == name) {
-                    return f;
-                }
+            auto it = entries_.find(name);
+            if (it != entries_.cend()) {
+                entries_.erase(it);
+                return true;
             }
-            throw std::out_of_range("Directory " + this->name() + " does not contain file " + name);
+            return false;
         }
 
-        file& get_file(const std::string& name) {
-            return const_cast<file&>(static_cast<const directory*>(this)->get_file(name));
-        }
-
-        const directory& get_directory(const std::string& name) const {
-            for (auto& dir : directories_) {
-                if (dir == name) {
-                    return dir;
-                }
+        const entry& at(const std::string& name) const {
+            auto it = entries_.find(name);
+            if (it != entries_.cend()) {
+                return *it->second;
             }
-            throw std::out_of_range("Directory " + this->name() + " does not contain sub-directory " + name);
+            throw std::out_of_range("Directory does not contain entry " + name + "!");
         }
-
-        directory& get_directory(const std::string& name) {
-            return const_cast<directory&>(static_cast<const directory*>(this)->get_directory(name));
-        }
-
-        const entry& at(const std::string& name) const;
 
         entry& at(const std::string& name) {
             return const_cast<entry&>(static_cast<const directory*>(this)->at(name));
@@ -206,35 +72,26 @@ namespace npnc {
         }
 
         size_type size() const noexcept {
-            return files_.size() + directories_.size();
+            return entries_.size();
         }
 
         iterator begin() noexcept {
-            return {*this, 0};
-        }
-
-        const_iterator begin() const noexcept {
-            return {*this, 0};
+            return entries_.begin();
         }
 
         iterator end() noexcept {
-            return {*this, files_.size() + directories_.size()};
+            return entries_.end();
+        }
+
+        const_iterator begin() const noexcept {
+            return entries_.begin();
         }
 
         const_iterator end() const noexcept {
-            return {*this, files_.size() + directories_.size()};
-        }
-
-        const_iterator cbegin() const noexcept {
-            return begin();
-        }
-
-        const_iterator cend() const noexcept {
-            return end();
+            return entries_.end();
         }
     private:
-        std::vector<file> files_;
-        std::vector<directory> directories_;
+        entries_type entries_;
     };
 }
 
