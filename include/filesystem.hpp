@@ -47,6 +47,27 @@ namespace npnc {
             return at(p);
         }
 
+        bool exist(path p) const noexcept {
+            p = current_path_ + p;
+            auto dir = &root_;
+            for (auto i = p.cbegin(); i != p.cend() - 1; ++i) {
+                if (*i == "/") {
+                    dir = &root_;
+                    continue;
+                }
+
+                if (!dir->exist(*i)) {
+                    return false;
+                }
+                
+                dir = dynamic_cast<const directory*>(&dir->at(*i));
+                if (!dir) {
+                    return false;
+                }
+            }
+            return dir->exist(*(p.cend() - 1));
+        }
+
         bool create_file(path p) {
             p = current_path_ + p;
             auto dir = &root_;
