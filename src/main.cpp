@@ -10,7 +10,6 @@ int main() {
     fs.create_file("Document/README.txt");
     fs.create_file("test");
     ls l(fs);
-    std::vector<std::string> args = {"Document"};
-    l(args);
+    l({"Document"});
     return 0;
 }
