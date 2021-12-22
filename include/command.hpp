@@ -23,9 +23,7 @@ namespace npnc {
         
         }
 
-        virtual void operator()(const std::vector<std::string>& args) {
-
-        }
+        virtual void operator()(const std::vector<std::string>& args) = 0;
     private:
         node& target_;
     };
