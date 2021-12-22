@@ -51,9 +51,13 @@ namespace npnc {
     };
 
     inline path operator+(const path& lhs, const path& rhs) noexcept {
-        path res = lhs;
-        res.elements_.insert(res.elements_.cend(), rhs.elements_.cbegin(), rhs.elements_.cend());
-        return res; 
+        if (!rhs.empty() && *rhs.begin() == "/") {
+            return rhs;
+        } else {
+            auto res = lhs;
+            res.elements_.insert(res.elements_.cend(), rhs.elements_.cbegin(), rhs.elements_.cend());
+            return res; 
+        }
     }
 }
 

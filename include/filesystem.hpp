@@ -9,29 +9,39 @@
 namespace npnc {
     class filesystem {
     public:
+        filesystem() {
+            current_directory_ = &root_;
+        }
+
         const path& current_path() const noexcept {
             return current_path_;
         }
 
-        void set_current_path(path p) noexcept {
+        void set_current_path(path p) {
+            current_directory_ = &root_;
+            auto& dir = at(p);
+            if (dir.is_directory()) {
+                current_directory_ = static_cast<const directory*>(&dir);
+            } else {
+                throw std::invalid_argument("Desired current path is not in a directory!");
+            }
             current_path_ = std::move(p);
         }
 
         const entry& at(path p) const {
-            p = current_path_ + p;
-            auto res = static_cast<const entry*>(&root_);
-            for (auto& e : p) {
-                if (e == "/") {
-                    res = &root_;
-                    continue;
-                }
+            auto res = current_directory_;
+            if (!p.empty() && *p.cbegin() == "/") {
+                res = &root_;
+            }
 
+            for (auto& e : p) {
                 if (res->is_directory()) {
                     res = &static_cast<const directory*>(res)->at(e);
                 } else {
-                    throw std::out_of_range(e + " is not in a directory");
+                    throw std::invalid_argument(e + " is not in a directory!");
                 }
             }
+
             return *res;
         }
 
@@ -48,60 +58,51 @@ namespace npnc {
         }
 
         bool exist(path p) const noexcept {
-            p = current_path_ + p;
-            auto dir = &root_;
-            for (auto i = p.cbegin(); i != p.cend() - 1; ++i) {
-                if (*i == "/") {
-                    dir = &root_;
-                    continue;
+            auto res = current_directory_;
+            if (!p.empty() && *p.cbegin() == "/") {
+                res = &root_;
+            }
+
+            for (auto& e : p) {
+                if (!res) {
+                    return false;
                 }
 
-                if (!dir->exist(*i)) {
-                    return false;
-                }
-                
-                dir = dynamic_cast<const directory*>(&dir->at(*i));
-                if (!dir) {
-                    return false;
+                if (res->is_directory()) {
+                    auto dir = static_cast<const directory&>(*res);
+                    if (dir.exist(e)) {
+                        res = &dir.at(e);
+                    } else {
+                        return false;
+                    }
+                } else {
+                    res = nullptr;
                 }
             }
-            return dir->exist(*(p.cend() - 1));
+
+            return true;
         }
 
         bool create_file(path p) {
-            p = current_path_ + p;
-            auto dir = &root_;
+            auto res = const_cast<entry*>(current_directory_);
             for (auto i = p.cbegin(); i != p.cend() - 1; ++i) {
-                if (*i == "/") {
-                    dir = &root_;
-                    continue;
-                }
-
-                dir = dynamic_cast<directory*>(&dir->at(*i));
-                if (!dir) {
-                    return false;
+                res = &static_cast<directory*>(res)->at(*i);
+                if (!res->is_directory()) {
+                    throw std::invalid_argument(*i + " is not a directory!");
                 }
             }
-            dir->create_file(*(p.cend() - 1));
-            return true;
+            return static_cast<directory*>(res)->create_file(*(p.cend() - 1));
         }
 
         bool create_directory(path p) {
-            p = current_path_ + p;
-            auto dir = &root_;
+            auto res = const_cast<entry*>(current_directory_);
             for (auto i = p.cbegin(); i != p.cend() - 1; ++i) {
-                if (*i == "/") {
-                    dir = &root_;
-                    continue;
-                }
-
-                dir = dynamic_cast<directory*>(&dir->at(*i));
-                if (!dir) {
-                    return false;
+                res = &static_cast<directory*>(res)->at(*i);
+                if (!res->is_directory()) {
+                    throw std::invalid_argument(*i + " is not a directory!");
                 }
             }
-            dir->create_directory(*(p.cend() - 1));
-            return true;
+            return static_cast<directory*>(res)->create_directory(*(p.cend() - 1));
         }
 
         const directory& root() const noexcept {
@@ -110,6 +111,7 @@ namespace npnc {
     private:
         directory root_;
         path current_path_;
+        const entry* current_directory_;
     };
 }
 
