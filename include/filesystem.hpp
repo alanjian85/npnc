@@ -69,7 +69,7 @@ namespace npnc {
                 }
 
                 if (res->is_directory()) {
-                    auto dir = static_cast<const directory&>(*res);
+                    auto& dir = static_cast<const directory&>(*res);
                     if (dir.exist(e)) {
                         res = &dir.at(e);
                     } else {
@@ -107,6 +107,10 @@ namespace npnc {
 
         const directory& root() const noexcept {
             return root_;
+        }
+
+        const entry& current_directory() const noexcept {
+            return *current_directory_;
         }
     private:
         directory root_;

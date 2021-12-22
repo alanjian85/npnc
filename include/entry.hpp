@@ -6,7 +6,9 @@
 namespace npnc {
     class entry {
     public: 
-        virtual ~entry() {}        
+        virtual ~entry() {
+
+        }        
 
         virtual bool is_directory() const noexcept {
             return false;
