@@ -19,7 +19,7 @@ namespace npnc {
             return current_path_;
         }
 
-        void set_current_path(path p);
+        void change_directory(path p);
 
         const directory& root() const noexcept {
             return root_;
