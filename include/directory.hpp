@@ -17,14 +17,13 @@ namespace npnc {
         using size_type = entries_type::size_type;
         
         class iterator {
-            friend class directory;
-            
+        public:     
             iterator(entries_type::iterator it)
                 : iterator_(it)
             {
                 
             }
-        public:
+
             iterator& operator++() noexcept {
                 ++iterator_;
                 return *this;
@@ -43,14 +42,13 @@ namespace npnc {
         };
         
         class const_iterator {
-            friend class directory;
-
+        public:
             const_iterator(entries_type::const_iterator it)
                 : iterator_(it)
             {
             
             }
-        public:
+        
             const_iterator& operator++() noexcept {
                 ++iterator_;
                 return *this;
