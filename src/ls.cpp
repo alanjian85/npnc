@@ -1,6 +1,8 @@
 #include "ls.hpp"
 using namespace npnc;
 
+#include "node.hpp"
+
 void ls::operator()(const std::vector<std::string>& args) {
     if (args.size() == 0) {
         for (auto [name, _] : static_cast<const directory&>(target().fs().current_directory())) {

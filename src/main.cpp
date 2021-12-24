@@ -1,8 +1,7 @@
 #include <iostream>
 
 #include "node.hpp"
-#include "ls.hpp"
-#include "mkdir.hpp"
+#include "command_manager.hpp"
 using namespace npnc;
 
 int main() {
@@ -12,9 +11,7 @@ int main() {
     fs.create_file("Document/README.txt");
     fs.create_file("test");
     fs.change_directory("Document");
-    mkdir m(computer);
-    m({"temp"});
-    ls l(computer);
-    l({});
+    computer.execute("mkdir", {"temp"});
+    computer.execute("ls", {});
     return 0;
 }

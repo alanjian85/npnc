@@ -4,9 +4,9 @@
 #include <string>
 #include <vector>
 
-#include "node.hpp"
-
 namespace npnc {
+    class node;
+
     class command {
     public:
         command(node& target) 
