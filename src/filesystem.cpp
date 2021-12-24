@@ -78,3 +78,14 @@ bool filesystem::create_directory(path p) {
     }
     return static_cast<directory*>(res)->create_directory(*(p.cend() - 1));
 }
+
+bool filesystem::remove(path p) {
+    auto res = static_cast<entry*>(const_cast<directory*>(current_directory_));
+    for (auto i = p.cbegin(); i != p.cend() - 1; ++i) {
+        res = &static_cast<directory*>(res)->at(*i);
+        if (!res->is_directory()) {
+            throw std::invalid_argument(*i + " is not a directory!");
+        }
+    }
+    return static_cast<directory*>(res)->remove(*(p.cend() - 1));
+}

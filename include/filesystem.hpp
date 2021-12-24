@@ -42,6 +42,7 @@ namespace npnc {
         bool exist(path p) const noexcept; 
         bool create_file(path p); 
         bool create_directory(path p);
+        bool remove(path p);
     private:    
         const directory* current_directory_;
         path current_path_;
