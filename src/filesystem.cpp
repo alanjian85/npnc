@@ -16,7 +16,7 @@ void filesystem::change_directory(path p) {
 
 const entry& filesystem::at(path p) const {
     auto res = static_cast<const entry*>(current_directory_);
-    for (auto& e : p) {
+    for (auto e : p) {
         if (e == "/") {
             res = &root_;
             continue;
@@ -24,7 +24,7 @@ const entry& filesystem::at(path p) const {
         if (res->is_directory()) {
             res = &static_cast<const directory*>(res)->at(e);
         } else {
-            throw std::invalid_argument(e + " is not in a directory!");
+            throw std::invalid_argument(std::string(e) + " is not in a directory!");
         }
     }
     return *res;
@@ -33,7 +33,7 @@ const entry& filesystem::at(path p) const {
 
 bool filesystem::exist(path p) const noexcept {
     auto res = static_cast<const entry*>(current_directory_);
-    for (auto& e : p) {
+    for (auto e : p) {
         if (!res) {
             return false;
         }
@@ -54,38 +54,4 @@ bool filesystem::exist(path p) const noexcept {
     }
 
     return true;
-}
-
-
-bool filesystem::create_file(path p) {
-    auto res = static_cast<entry*>(const_cast<directory*>(current_directory_));
-    for (auto i = p.cbegin(); i != p.cend() - 1; ++i) {
-        res = &static_cast<directory*>(res)->at(*i);
-        if (!res->is_directory()) {
-            throw std::invalid_argument(*i + " is not a directory!");
-        }
-    }
-    return static_cast<directory*>(res)->create_file(*(p.cend() - 1));
-}
-
-bool filesystem::create_directory(path p) {
-    auto res = static_cast<entry*>(const_cast<directory*>(current_directory_));
-    for (auto i = p.cbegin(); i != p.cend() - 1; ++i) {
-        res = &static_cast<directory*>(res)->at(*i);
-        if (!res->is_directory()) {
-            throw std::invalid_argument(*i + " is not a directory!");
-        }
-    }
-    return static_cast<directory*>(res)->create_directory(*(p.cend() - 1));
-}
-
-bool filesystem::remove(path p) {
-    auto res = static_cast<entry*>(const_cast<directory*>(current_directory_));
-    for (auto i = p.cbegin(); i != p.cend() - 1; ++i) {
-        res = &static_cast<directory*>(res)->at(*i);
-        if (!res->is_directory()) {
-            throw std::invalid_argument(*i + " is not a directory!");
-        }
-    }
-    return static_cast<directory*>(res)->remove(*(p.cend() - 1));
 }

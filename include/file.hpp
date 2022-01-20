@@ -12,11 +12,11 @@ namespace npnc {
             return true;
         }
 
-        std::size_t space() const noexcept override {
-            return static_cast<std::size_t>(content_.size());
+        size_type size() const override {
+            return content.size();
         }
-    private:
-        std::string content_;
+
+        std::string content;
     };
 }
 
